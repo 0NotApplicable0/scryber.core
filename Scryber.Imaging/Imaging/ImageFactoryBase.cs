@@ -87,8 +87,13 @@ namespace Scryber.Imaging
             try
             {
                 var result = await httpClient.GetStreamAsync(path);
-
-                return result;
+                
+                // Copy stream data to memory just in case HttpClient stream is closed before use
+                // In this case it is not disposed manually and it is garbage collected.
+                var localStream = new MemoryStream(); 
+                await result.CopyToAsync(localStream);
+                
+                return localStream;
             }
             finally
             {
